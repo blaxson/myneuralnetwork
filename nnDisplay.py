@@ -9,7 +9,7 @@ class Neuron(object):
         self.circle = Circle(self.position, 17.5)
         self.bias = bias
 
-    def draw_neuron(self, win):
+    def draw(self, win):
         self.circle.draw(win)
         if self.bias:
             txt = Text(self.position, self.bias)
@@ -27,12 +27,12 @@ class Layer(object):
     """ given the x and y coordinates and the index of the neuron in the layer,
         set_neuron creates a neuron and adds it to the layer's neurons list. 
         Returns the new neuron object """
-    def set_neuron(self, x_val, y_val, index):
+    def set_neuron(self, x_val, y_val, n_index):
         bias = None
         if self.biases is not None:
-            bias = self.biases[index]
+            bias = self.biases[n_index]
         n = Neuron(x_val, y_val, bias)
-        self.neurons[index] = n
+        self.neurons[n_index] = n
         return n 
 
     def set_large_layer(self, win, x_val):
@@ -43,75 +43,40 @@ class Layer(object):
         pt = Point(x_val,410)
         pt.draw(win)
         for i in range (0, 8):
-            bias = None
-            if self.biases is not None:
-                bias = self.biases[i]
-            
-            n = Neuron(x_val, 40 + (i*45), bias)
-            self.neurons[i] = n
-            n.draw_neuron(win)
+            neuron = self.set_neuron(x_val, 40 + (i*45), i)
+            neuron.draw(win)
 
         for i in range (0, 8):
             n_index = self.num_neurons - (1 + i)
-            bias = None 
-            if self.biases is not None:
-                bias = self.biases[n_index]
-
-            n = Neuron(x_val, 760 - (i*45), bias)
-            self.neurons[n_index] = n
-            n.draw_neuron(win)
+            neuron = self.set_neuron(x_val, 760 - (i*45), n_index)
+            neuron.draw(win)
 
     def set_layer(self, win, x_val):
         mid = self.num_neurons // 2
         if self.num_neurons % 2: # if odd, then add middle neuron first
-            bias = None 
-            if self.biases is not None:
-                bias = self.biases[mid]
-
-            n = Neuron(x_val, 400, bias)
-            self.neurons[mid] = n
-            n.draw_neuron(win)
+            neuron = self.set_neuron(x_val, 400, mid)
+            neuron.draw(win)
 
             for i in range (0, mid):
                 n_index = mid - (i + 1)
-                bias = None 
-                if self.biases is not None:
-                    bias = self.biases[n_index]
-
-                n = Neuron(x_val, 355 - (i*45), bias)
-                self.neurons[n_index] = n
-                n.draw_neuron(win)
+                neuron = self.set_neuron(x_val, 355 - (i*45), n_index)
+                neuron.draw(win)
   
             for i in range(0, mid):
                 n_index = mid + (i + 1)
-                bias = None 
-                if self.biases is not None:
-                    bias = self.biases[n_index]
-
-                n = Neuron(x_val, 445 + (i*45), bias)
-                self.neurons[n_index] = n
-                n.draw_neuron(win)
+                neuron = self.set_neuron(x_val, 445 + (i*45), n_index)
+                neuron.draw(win)
 
         else:
             for i in range(0, mid):
                 n_index = mid - (i + 1)
-                bias = None 
-                if self.biases is not None:
-                    bias = self.biases[n_index]
-
-                n = Neuron(x_val, 377.5 - (i*45), bias)
-                self.neurons[n_index] = n
-                n.draw_neuron(win) 
+                neuron = self.set_neuron(x_val, 377.5 - (i*45), n_index)
+                neuron.draw(win) 
 
             for i in range(0, mid):
                 n_index = mid + i
-                bias = None 
-                if self.biases is not None:
-                    bias = self.biases[n_index]
-
-                n = Neuron(x_val, 422.5 + (i*45), bias)
-                self.neurons[n_index] = n
-                n.draw_neuron(win)
+                neuron = self.set_neuron(x_val, 422.5 + (i*45), n_index)
+                neuron.draw(win)
 
 # ******************************************************************************
 
