@@ -114,12 +114,41 @@ def draw_layer(win, x_val, layer):
     if layer.num_neurons > 16:
         layer.set_large_layer(win, x_val)
     else:
-        layer.set_layer(win, x_val)
-    return None
+        layer.set_small_layer(win, x_val)
 
-def set_network(win, layers):
-    for i in range(0, len(layers)):
-        draw_layer(win, 80 + (i * 280), layers[i])
-    return None
+
+def draw_weights(win, cur_layer, prev_layer):
+    cur_mid = cur_layer.num_neurons // 2
+    prev_mid = prev_layer.num_neurons // 2
+    # set the first neurons after the mid... accounts for large layers
+    if cur_layer.num_neurons > 16:
+        end_cur = cur_layer.num_neurons - 9
+    else:
+        end_cur = cur_mid - 1
+    if prev_layer.num_neurons > 16:
+        end_prev = prev_layer.num_neurons - 9
+    else:
+        end_prev = prev_mid - 1
+    
+    # do the first half of current layer
+    for i in range(0, min(cur_mid, 8)):
+        # connects with first half of prev_layer
+        for j in range(0, min(prev_mid, 8)): 
+            line = Line(cur_layer.neurons[i].position, prev_layer.neurons[j].position)
+            line.draw(win)
+        # connects with second half of prev_layer
+        for j in range(prev_layer.num_neurons - 1, end_prev, -1):
+            line = Line(cur_layer.neurons[i].position, prev_layer.neurons[j].position)
+            line.draw(win)
+    # do the second half of current layer
+    for i in range(cur_layer.num_neurons - 1, end_cur - 1, -1):
+        # connects with first half of prev_layer
+        for j in range(0, min(prev_mid, 8)): 
+            line = Line(cur_layer.neurons[i].position, prev_layer.neurons[j].position)
+            line.draw(win)
+        # connects with second half of prev_layer
+        for j in range(prev_layer.num_neurons - 1, end_prev, -1):
+            line = Line(cur_layer.neurons[i].position, prev_layer.neurons[j].position)
+            line.draw(win)
 
 main()
