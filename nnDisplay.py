@@ -8,6 +8,8 @@ class Neuron(object):
         self.position = Point(x, y)
         self.circle = Circle(self.position, 17.5)
         self.bias = bias
+        self.circle.setFill("white")
+        self.circle.setOutline("black")
 
     def draw(self, win):
         self.circle.draw(win)
@@ -43,60 +45,61 @@ class Layer(object):
         pt = Point(x_val,410)
         pt.draw(win)
         for i in range (0, 8):
-            neuron = self.set_neuron(x_val, 40 + (i*45), i)
-            neuron.draw(win)
-
+            self.set_neuron(x_val, 40 + (i*45), i)
         for i in range (0, 8):
             n_index = self.num_neurons - (1 + i)
-            neuron = self.set_neuron(x_val, 760 - (i*45), n_index)
-            neuron.draw(win)
+            self.set_neuron(x_val, 760 - (i*45), n_index)
 
-    def set_layer(self, win, x_val):
+    def set_small_layer(self, win, x_val):
         mid = self.num_neurons // 2
         if self.num_neurons % 2: # if odd, then add middle neuron first
-            neuron = self.set_neuron(x_val, 400, mid)
-            neuron.draw(win)
-
+            self.set_neuron(x_val, 400, mid)
             for i in range (0, mid):
                 n_index = mid - (i + 1)
-                neuron = self.set_neuron(x_val, 355 - (i*45), n_index)
-                neuron.draw(win)
-  
+                self.set_neuron(x_val, 355 - (i*45), n_index)
             for i in range(0, mid):
                 n_index = mid + (i + 1)
-                neuron = self.set_neuron(x_val, 445 + (i*45), n_index)
-                neuron.draw(win)
-
+                self.set_neuron(x_val, 445 + (i*45), n_index)
         else:
             for i in range(0, mid):
                 n_index = mid - (i + 1)
-                neuron = self.set_neuron(x_val, 377.5 - (i*45), n_index)
-                neuron.draw(win) 
-
+                self.set_neuron(x_val, 377.5 - (i*45), n_index)
             for i in range(0, mid):
                 n_index = mid + i
-                neuron = self.set_neuron(x_val, 422.5 + (i*45), n_index)
-                neuron.draw(win)
+                self.set_neuron(x_val, 422.5 + (i*45), n_index)
 
+    def draw_large_layer(self, win):
+        x_val = self.neurons[0].position.getX()
+        pt =  Point(x_val, 400)
+        pt.draw(win)
+        pt = Point(x_val, 390)
+        pt.draw(win)
+        pt = Point(x_val,410)
+        pt.draw(win)
+        for i in range(0, 8):
+            self.neurons[i].draw(win) # draw first 8 neurons
+            self.neurons[self.num_neurons - (1 + i)].draw(win) # last 8 neurons
+
+    def draw_small_layer(self, win):
+        # can draw all neurons at once b/c pos already known & no dots in middle
+        for i in range(0, self.num_neurons):
+            self.neurons[i].draw(win) 
+        
+    def draw(self, win):
+        if self.num_neurons > 16:
+            self.draw_large_layer(win)
+        else:
+            self.draw_small_layer(win)
 # ******************************************************************************
 
 def main():
     training_data, validation_data, test_data = load_data_wrapper()
-    network = NeuralNetwork([784, 16, 16, 10])
+    network = NeuralNetwork([784, 16, 5, 16, 10])
     layers = create_layers(network)
     win = initialize_screen(network.sizes)
     set_network(win, layers)
     win.getMouse()
     win.close()
-
-def initialize_screen(sizes):
-    wth = 160 + (280 * (len(sizes)-1))
-    wth = wth if wth < 1280 else 1280
-    win = GraphWin(title="my window", width=wth, height=900)
-    win.setBackground("white")
-    ln = Line(Point(0,800), Point(wth, 800))
-    ln.draw(win)
-    return win
 
 """ takes in NeuralNetwork Object and returns a list of layers, where each 
     index corresponds to each proceeding layer. layer[0] is first layer in nn, 
@@ -110,7 +113,24 @@ def create_layers(nn):
         layers.append(Layer(i+1, nn.sizes[i+1], nn.weights[i], nn.biases[i]))
     return layers
 
-def draw_layer(win, x_val, layer):
+def initialize_screen(sizes):
+    wth = 160 + (280 * (len(sizes)-1))
+    wth = wth if wth < 1280 else 1280
+    win = GraphWin(title="my window", width=wth, height=900)
+    win.setBackground("white")
+    ln = Line(Point(0,800), Point(wth, 800))
+    ln.draw(win)
+    return win
+
+def set_network(win, layers):
+    for i in range(0, len(layers)):
+        set_layer(win, 80 + (i * 280), layers[i])
+        if i > 0:
+            draw_weights(win, layers[i], layers[i-1])
+            layers[i-1].draw(win) # draw neurons after drawing weight lines
+    layers[len(layers)-1].draw(win) # draw last layer of neurons
+
+def set_layer(win, x_val, layer):
     if layer.num_neurons > 16:
         layer.set_large_layer(win, x_val)
     else:
