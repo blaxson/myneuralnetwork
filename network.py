@@ -1,25 +1,6 @@
 import random
 import numpy as np
-from graphics import *
-
-""" used exclusively for the NN representation """
-# class Neuron(object):
-#     def __init__(self, x, y, layer_index):
-#         self.position = Point(x, y)
-#         self.circle = Circle(self.position, 17.5)
-#         self.previous_layer = Layer()
-#         self.next_layer = Layer()
-
-# """ used exclusively for the NN representation """
-# class Layer(object):
-#     def __init__(self, index, weights, biases, size=0):
-#         self.index = index
-#         self.num_neurons = size
-#         #self.list = [None] * size
-#         self.weights = weights
-#         self.biases = biases
-
-# ******************************************************************************
+# from graphics import *
 
 """ class that is used for actual neural network functionality, some repr"""
 class NeuralNetwork(object):
@@ -49,10 +30,10 @@ class NeuralNetwork(object):
             x = sigmoid(np.dot(weight, x) + bias)
         return x 
 
-    """Returns the number of test inputs for which the neural
-       network outputs the correct result. The neural
-       network's output is the index of whichever
-       neuron in the final layer has the highest activation."""
+    """ Returns the number of test inputs for which the neural
+        network outputs the correct result. The neural
+        network's output is the index of whichever
+        neuron in the final layer has the highest activation."""
     def evaluate(self, test_data):
 
         test_results = [(np.argmax(self.feedforward(x)), y)
@@ -61,32 +42,31 @@ class NeuralNetwork(object):
 
     """ Trains the neural network using stochastic gradient descent using
         dataset batches. 'trainging_data' is a list of tuples (x, y) containing 
-        the 'x' training inputs and the 'y' correct desired outputs. 'epochs' is 
-        the number of desired iterations/cycles to train for. 'batch_size' is
-        the desired size of the randomly chosen dataset batches. 'l_rate' is the
-        learning rate of the neural network. Optional arg 'test_data' is given 
-        which will evaluate the network after each epoch and print partial
-        progress (warning: very slow) """
-    def train(self, training_data, epochs, batch_size, l_rate, test_data=None):
-
+        the 'x' training inputs and the 'y' correct desired outputs.'batch_size' 
+        is the desired size of the randomly chosen dataset batches. 'l_rate' is 
+        the learning rate of the neural network. Optional arg 'test_data' is 
+        given which will evaluate the network after each epoch and print partial
+        progress (warning: very slow). Returns the updated biases and weights
+        from one training iteration """
+    def train_iteration(self, training_data, batch_size, l_rate, i, test_data=None):
         if test_data:
             len_test = len(test_data)
         len_training = len(training_data)
-        # for each iteration of training
-        for i in range(epochs):
-            # randomly shuffle data to help with training process
-            random.shuffle(training_data)
-            # partition all data into batches of data
-            batches = [
-                training_data[j : j + batch_size] for j in range(0, len_training, batch_size)]
-            # go thru each batch & apply gradient decent in backpropogation
-            for batch in batches:
-                self.update_weights_and_biases(batch, l_rate)
-            if test_data:
-                print("Iteration {0}: {1} / {2}".format(
-                    i, self.evaluate(test_data), len_test))
-            else:
-                print("Iteration {0} complete".format(i)) 
+        # randomly shuffle data to help with training process
+        random.shuffle(training_data)
+        # partition all data into batches of data
+        batches = [
+            training_data[j : j + batch_size] for j in range(0, len_training, batch_size)]
+        # go thru each batch & apply gradient decent in backpropogation
+        for batch in batches:
+            self.update_weights_and_biases(batch, l_rate)
+        if test_data:
+            print("Iteration {0}: {1} / {2}".format(
+                i, self.evaluate(test_data), len_test))
+        else:
+            print("Iteration {0} complete".format(i)) 
+        # return the new biases and weights after one training iteration
+        return (self.biases, self.weights)
         
     """ updates the neural network's weights and biases by applying gradient
         descent using backpropogation on a single batch of test data. 'batch'
@@ -103,10 +83,10 @@ class NeuralNetwork(object):
         self.biases =  [b - (l_rate / len(batch)) * gb 
                         for b, gb in zip(self.biases, gradient_b)]
         # **** this portion added for displaying NN ************************
-        for i in range(0, self.num_layers):
-            self.layers[i].weights = self.weights[i]
-            self.layers[i].biases = self.biases[i] 
-    
+        # for i in range(0, self.num_layers):
+        #     self.layers[i].weights = self.weights[i]
+        #     self.layers[i].biases = self.biases[i] 
+
     """Return a tuple ``(nabla_b, nabla_w)`` representing the
        gradient for the cost function C_x.  ``nabla_b`` and
        ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
