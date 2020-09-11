@@ -12,6 +12,7 @@ class Neuron(object):
         self.circle.setFill("white")
         self.circle.setOutline("black")
 
+    """ draws a single neuron. follows graphics.py style and structure """
     def draw(self, win):
         self.circle.draw(win)
         # if self.bias:
@@ -27,13 +28,13 @@ class Layer(object):
         self.weights = weights
         self.biases = biases
 
-    """ given a layer object, update_layer updates the weights and biases of 
-    that layer and returns the updated layer """
+    """ Given a layer object, update_layer updates the weights and biases of 
+        that layer and returns the updated layer """
     def update_layer(self, weights, biases):
         self.weights = weights
         self.biases = biases
 
-    """ given the x and y coordinates and the index of the neuron in the layer,
+    """ Given the x and y coordinates and the index of the neuron in the layer,
         set_neuron creates a neuron and adds it to the layer's neurons list. 
         Returns the new neuron object """
     def set_neuron(self, x_val, y_val, n_index):
@@ -44,7 +45,7 @@ class Layer(object):
         self.neurons[n_index] = n
         return n 
 
-    """ sets the neurons in the Layer object of layers with more than 16 neurons
+    """ Sets the neurons in the Layer object of layers with more than 16 neurons
     """
     def set_large_layer(self, win, x_val):
         for i in range (0, 8):
@@ -53,7 +54,7 @@ class Layer(object):
             n_index = self.num_neurons - (1 + i)
             self.set_neuron(x_val, 760 - (i*45), n_index)
 
-    """ sets the neurons in the Layer object of layers with 16 or less neurons
+    """ Sets the neurons in the Layer object of layers with 16 or less neurons
     """
     def set_small_layer(self, win, x_val):
         mid = self.num_neurons // 2
@@ -72,7 +73,8 @@ class Layer(object):
             for i in range(0, mid):
                 n_index = mid + i
                 self.set_neuron(x_val, 422.5 + (i*45), n_index)
-
+    
+    """ draws the neurons of a layer with more than 16 neurons """
     def draw_large_layer(self, win):
         x_val = self.neurons[0].position.getX()
         pt =  Point(x_val, 400)
@@ -85,6 +87,7 @@ class Layer(object):
             self.neurons[i].draw(win) # draw first 8 neurons
             self.neurons[self.num_neurons - (1 + i)].draw(win) # last 8 neurons
 
+    """ draws the neurons of a layer with 16 or less neurons """
     def draw_small_layer(self, win):
         # can draw all neurons at once b/c pos already known & no dots in middle
         for i in range(0, self.num_neurons):
@@ -124,7 +127,7 @@ def main():
     win.getMouse()
     win.close()
 
-""" takes in NeuralNetwork Object and returns a list of layers, where each 
+""" Takes in NeuralNetwork Object and returns a list of layers, where each 
     index corresponds to each proceeding layer. layer[0] is first layer in nn, 
     layer[1] is second, etc. """
 def create_layers(nn):
@@ -136,7 +139,8 @@ def create_layers(nn):
         layers.append(Layer(i+1, nn.sizes[i+1], nn.weights[i], nn.biases[i]))
     return layers
 
-
+""" Dynamically initializes the screen based on how many layers there are.
+    Max of 5 layers. returns the window object and the width of the screen """
 def initialize_screen(sizes):
     wth = 160 + (280 * (len(sizes)-1))
     wth = wth if wth < 1280 else 1280
@@ -146,6 +150,9 @@ def initialize_screen(sizes):
     ln.draw(win)
     return win, wth
 
+""" Primary loop for drawing the entire neural network based on the layers
+    given. This functions sets each layer's neurons, then draws the weights, 
+    and then draws the neurons themselves """
 def draw_network(win, layers):
     for i in range(0, len(layers)):
         set_layer(win, 80 + (i * 280), layers[i])
@@ -154,12 +161,15 @@ def draw_network(win, layers):
             layers[i-1].draw(win) # draw neurons after drawing weight lines
     layers[len(layers)-1].draw(win) # draw last layer of neurons
 
+""" sets the layer's neuron's positions """
 def set_layer(win, x_val, layer):
     if layer.num_neurons > 16:
         layer.set_large_layer(win, x_val)
     else:
         layer.set_small_layer(win, x_val)
 
+""" Given the two neurons to connect b/w cur and prev layers, update_line draws
+    the line based upon its weight. Negative weight is red, Pos. is blue """
 def update_line(win, cur_layer, prev_layer, i, j):
     line = Line(cur_layer.neurons[i].position, prev_layer.neurons[j].position)
     if cur_layer.weights[i][j] < 0:
@@ -169,6 +179,7 @@ def update_line(win, cur_layer, prev_layer, i, j):
     line.setWidth(8 * (sigmoid(abs(cur_layer.weights[i][j])) - 0.5))
     line.draw(win)
 
+""" Primary function for drawing each layer's weights on the screen """
 def draw_weights(win, cur_layer, prev_layer):
     cur_mid = cur_layer.num_neurons // 2
     prev_mid = prev_layer.num_neurons // 2
@@ -182,10 +193,7 @@ def draw_weights(win, cur_layer, prev_layer):
         end_prev = prev_layer.num_neurons - 9
     else:
         end_prev = prev_mid - 1
-    
-    print("end_cur: {0}".format(end_cur))
-    print("end_prev: {0}".format(end_prev))
-    
+
     # do the 1st half of current layer
     for i in range(0, min(cur_mid, 8)):
         # connects w/ 1st half of prev_layer
@@ -203,5 +211,5 @@ def draw_weights(win, cur_layer, prev_layer):
         for j in range(prev_layer.num_neurons - 1, end_prev, -1):
             update_line(win, cur_layer, prev_layer, i, j)
 
-
-main()
+if __name__ == "__main__":
+    main()
