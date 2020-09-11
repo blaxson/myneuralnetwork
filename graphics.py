@@ -23,6 +23,7 @@ simple example, here is a complete program to draw a circle of radius
 --------------------------------------------------------------------
 from graphics import *
 
+
 def main():
     win = GraphWin("My Circle", 100, 100)
     c = Circle(Point(50,50), 10)
